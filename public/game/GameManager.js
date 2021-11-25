@@ -6,7 +6,10 @@ var xColors = [[255,0,0],[0,0,255],[214, 116, 211], [52,155,7],[221,205,13]]
 
 const speed = 5;
 
+let bg;
+
 let obstacles = [];
+let backgrounds = [];
 let mainPlayer;
 
 var MAP = 
@@ -49,6 +52,7 @@ var MAP =
 
 var obSize = 64;
 var xCount = MAP.length/34; 
+var yCount = 34
 
 class MainPlayer
 {
@@ -89,31 +93,28 @@ class Obstacle
     }
 }
 
-// function keyPressed()
-// {
-//     if(keyCode == 87)
-//     {
-//         mainPlayer.y += speed;
-//     }
-    
-//     if(keyCode == 83)
-//     {
-//         mainPlayer.y -= speed;
-//     }
-    
-//     if(keyCode == 65)
-//     {
-//         mainPlayer.x -= speed;
-//     }
-    
-//     if(keyCode == 68)
-//     {
-//         mainPlayer.x += speed;
-//     }
-// }
+class Background
+{
+    constructor(x, y, color, width)
+    {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.width = width
+    }
+
+    RenderOb(pX, pY)
+    {
+        fill(color(this.color[0],this.color[1],this.color[2]))
+        //console.log(pX)
+        rect(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
+    }
+}
+
 
 function setup()
 {
+    bg = loadImage("assets/backgroundImage.gif")
     frameRate(60)
     createCanvas(windowW, windowH);
     canvOb = document.getElementById("defaultCanvas0")
@@ -122,13 +123,22 @@ function setup()
 }
 function draw()
 {
+
+
     console.log("??")
     clear();
+    background(bg)
     //console.log(mainPlayer.x)
+    noStroke()
+    for(let i = 0; i < backgrounds.length; i++)
+    {
+        backgrounds[i].RenderOb(mainPlayer.x, mainPlayer.y);
+    }
     for(let i = 0; i < obstacles.length; i++)
     {
         obstacles[i].RenderOb(mainPlayer.x, mainPlayer.y);
     }
+    stroke(1)
     mainPlayer.RenderOb();
     if(keyIsDown(87))
     {
@@ -160,14 +170,16 @@ function CreateMap()
         //console.log((MAP[i]))
         if(MAP[i] == 1)
         {
-            
-            obstacles.push(new Obstacle((i-Math.floor(i/xCount)*xCount) * obSize  ,Math.floor(i/xCount) *obSize,5, obSize,  ))
+            obstacles.push(new Obstacle((i-Math.floor(i/xCount)*xCount) * obSize  ,Math.floor(i/xCount) *obSize,5, obSize+1  ))
         }
         else if(MAP[i] == -1)
         {
-            console.log(":)")
-            console.log((i-Math.floor(i/xCount)*xCount))
             mainPlayer = new MainPlayer((i-Math.floor(i/xCount)*xCount) * obSize  ,Math.floor(i/xCount) *obSize,5);
+            backgrounds.push(new Background((i-Math.floor(i/xCount)*xCount) * obSize  ,Math.floor(i/xCount) *obSize,[255-(25*(i%2)),255-(25*(i%2)),255-(25*(i%2))], obSize+1 ))
+        }
+        else if(MAP[i]==0)
+        {
+            backgrounds.push(new Background((i-Math.floor(i/xCount)*xCount) * obSize  ,Math.floor(i/xCount) *obSize,[255-(25*(i%2)),255-(25*(i%2)),255-(25*(i%2))], obSize+1 ))
         }
     }
 }
