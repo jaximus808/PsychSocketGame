@@ -5,21 +5,39 @@ const http = require(`http`)
 const server = http.createServer(app)
 const io = socketio(server)
 const path = require(`path`)
+const cookieParser = require("cookie-parser");
 
-const PlayerManager = require(`./PlayerManager.js`)
+const playerManager = require(`./PlayerManager.js`)
+const gameManager = require(`./GameManager.js`)
 
-const playerManager = new PlayerManager();
 
-require(`./sockets/socketcom`)(io)
+app.use(cookieParser());
+const PlayerManager = new playerManager();
+const GameManager = new gameManager(io, PlayerManager)
 
 app.use(express.json())
-
+app.use(express.urlencoded({
+    extended:false
+}));
 app.use(`/`, express.static(path.join(__dirname, `public`, `home`)))
+app.use("/",require("./router/routes"))
+app.use("/ingame", (req,res,next) =>
+{
+  const name = req.cookies.usernameSet;
+  if(!name)
+  {
+    res.redirect("/")
+    return;
+  }
+  if(name.replace(/\s/g, '') == '')
+  {
+    res.redirect("/")
+    return;
+  }
+  
+  next(); 
 
-// app.get(`/`, (req,res) =>
-// {
-//   res.send(`work`)
-// })
+}, express.static(path.join(__dirname,"public", "game")))
 
 server.listen(3000, console.log(`Server up`))
 // playerManager.PlayerConnect(`jwwqs`,`swag`)

@@ -1,1 +1,46 @@
-<h1>HELLO</h1>
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>Psych Food Battle</h1>
+
+    <p> Battle for your team! </p>
+
+    <p>Username: </p>
+    <input id="username">
+    <p id="status"></p>
+    <button onclick="Join()">Join Game!</button>
+    <script>
+      function Join()
+      {
+        document.getElementById("status").innerHTML= "YO"
+        if(document.getElementById("username").value.replace(/\s/g, '') == '' || document.getElementById("username").value == "")
+        {
+          document.getElementById("status").innerHTML = "Please Input A Name!"
+          return;
+        }
+        fetch(location.protocol+"//"+window.location.host+"/setUserCookie", {
+          method:"POST",
+          mode:"cors",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            usernameSet: document.getElementById("username").value
+          })
+        }).then(res => res.json()).then(data =>
+        {
+          if(data.error)
+          {
+            document.getElementById("status").innerHTML = "Something went wrong..."
+          }
+          else 
+          {
+
+            window.location.href = "/ingame"
+          }
+        })
+      }
+    </script>
+  </body>
+</html>
