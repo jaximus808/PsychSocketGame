@@ -1,5 +1,5 @@
 var windowH = window.innerHeight*0.95
-var windowW = windowH
+var windowW = window.innerWidth*0.7
 var rad = 10;
 
 var xColors = [[255,0,0],[0,0,255],[214, 116, 211], [52,155,7],[221,205,13]]
@@ -54,7 +54,7 @@ class MainPlayer
 {
     constructor(x, y, color)
     {
-        this.displayX = windowH/2
+        this.displayX = windowW/2
         this.displayY = windowH/2
         this.x = x; 
         this.y = y;
@@ -85,7 +85,7 @@ class Obstacle
     {
         fill(color(255,0,0))
         //console.log(pX)
-        rect(windowH/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
+        rect(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
     }
 }
 
@@ -115,7 +115,7 @@ class Obstacle
 function setup()
 {
     frameRate(60)
-    createCanvas(windowW, windowW);
+    createCanvas(windowW, windowH);
     canvOb = document.getElementById("defaultCanvas0")
     rectMode(CENTER)
    
