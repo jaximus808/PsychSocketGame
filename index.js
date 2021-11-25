@@ -9,11 +9,11 @@ const cookieParser = require("cookie-parser");
 
 const playerManager = require(`./PlayerManager.js`)
 const gameManager = require(`./GameManager.js`)
-
+const map = require("./MAP.js")
 
 app.use(cookieParser());
 const PlayerManager = new playerManager();
-const GameManager = new gameManager(io, PlayerManager)
+const GameManager = new gameManager(io, PlayerManager,map)
 
 app.use(express.json())
 app.use(express.urlencoded({
