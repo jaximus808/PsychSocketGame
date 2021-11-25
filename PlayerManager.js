@@ -26,10 +26,13 @@ module.exports = class PlayerManager{
 
   PlayerConnect(_id, name)
   {
+    const adminSet = Object.keys(this.PlayerData).length == 0;
+    
     this.PlayerData[_id] = 
     {
       username:name,
       teamId: `notSet`,
+      admin:adminSet
     }
     console.log(this.PlayerData)
   }
@@ -43,6 +46,11 @@ module.exports = class PlayerManager{
       {
         if(i != _id) newArray.append(i);
       }
+    }
+    if(this.PlayerData[_id].admin && Object.keys(this.PlayerData).length-1 > 0)
+    {
+      //we need to create a new admin, 
+      this.PlayerData[Object.keys(this.PlayerData)[1]].admin = true;
     }
     delete this.PlayerData[_id];
     console.log(this.PlayerData)
