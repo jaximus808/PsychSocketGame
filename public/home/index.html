@@ -7,13 +7,14 @@
     <p> Battle for your team! </p>
 
     <p>Username: </p>
-    <input id="username">
+    <input autocomplete="off" id="username">
     <p id="status"></p>
     <button onclick="Join()">Join Game!</button>
     <script>
       function Join()
       {
-        document.getElementById("status").innerHTML= "YO"
+        
+        document.getElementById("status").innerHTML= "Attempting to join"
         if(document.getElementById("username").value.replace(/\s/g, '') == '' || document.getElementById("username").value == "")
         {
           document.getElementById("status").innerHTML = "Please Input A Name!"
