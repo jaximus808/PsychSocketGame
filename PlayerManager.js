@@ -45,15 +45,18 @@ module.exports = class PlayerManager{
     this.TeamData[setTeamId].ids.push(_id);
     console.log(`New player is assigned ${this.TeamData[setTeamId].name}`)
 
-    this.PlayerData[_id] = 
-    {
+    const playerData = {
       username:name,
       teamId: setTeamId,
       admin:adminSet
     }
+
+    this.PlayerData[_id] = playerData
+    
     console.log(this.PlayerData)
     
     console.log(this.TeamData)
+    return playerData;
   }
 
   PlayerDisconnect(_id)
