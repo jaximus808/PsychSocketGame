@@ -3,11 +3,34 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <p>nice</p>
+    <h1>Ant Game</h1>
     <p id="test"></p>
     <p id="locationCoord"></p>
+    <p id="playersCount">Players:</p>
+    <p id="Gamestate">Game is waiting for host to start</p>
+    <!-- make these appear by actually putting text in them when the game starts. format like "Points: 42" etc for the team -->
+    <p id="Timer"></p>
+    <p id="team1Points"></p>
+    <p id="team2Points"></p>
+    <p id="team3Points"></p>
+    <p id="team4Points"></p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
+    
+    <div id="chatArea" style="width: 20%; height: 30%; background-color: rgba(186, 186, 186,0.4); position: absolute; right: 200px;z-index: 5;">
+      <div id="chatContianer" style="background-color: rgba(92, 92, 92,0.4); width:98%; height:73%; margin-left: 1% ;margin-top: 1% ;"  id="chatContianer"></div>
+      <div id="inputArea" style="background-color:rgba(92, 92, 92,0.4) ;height:20%; width:98%; margin-left: 1%;margin-top: 2%;">
+        <label  novalidate for="inp" class="inp" >
+          <input class="inputMessage" style="margin-left: 1%;"type="text" id="inp" placeholder="message" pattern=".{6,}" required>
+          <svg margin-left="1%"width="60%" height="18px" viewBox="0 0 280 18" class="border">
+            <path d="M0,12 L223.166144,12 C217.241379,12 217.899687,12 225.141066,12 C236.003135,12 241.9279,12 249.827586,12 C257.727273,12 264.639498,12 274.514107,12 C281.097179,12 281.755486,12 276.489028,12"></path>
+          </svg>
+          
+        </label>
+        
+      <button onclick="SendMessageDOM()" class="btn">Send</button>
+      </div>
+    </div>
     
     <script src="GameManager.js"></script>
     <script src="communicator.js"></script>
