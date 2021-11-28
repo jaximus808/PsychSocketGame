@@ -1,3 +1,5 @@
+
+
 const socket = io();
 
 var windowH = window.innerHeight*0.95
@@ -19,13 +21,16 @@ let backgrounds = [];
 let props = [];
 let mainPlayer;
 const clients = {};
-
+let food = {};
+let currentQuestionId; 
+let promptFoodId; 
 var MAP; 
 
 const colorArray = [[133, 31, 24], [20, 24, 120], [179, 159, 29], [31, 173, 79]]
 
 const playerColorArray = [[138, 40, 24], [30, 20, 110], [169, 145, 39], [26, 183, 69]]
 
+var prompted = false;
 var obSize = 64;
 var xCount;
 var yCount = 34
@@ -65,6 +70,12 @@ socket.on("GameInformation", (data) =>
             clients[Object.keys(data.playerData)[i]] = new Players(data.playerData[Object.keys(data.playerData)[i]].posX, data.playerData[Object.keys(data.playerData)[i]].posY, playerColorArray[data.playerData[Object.keys(data.playerData)[i]].teamId],data.playerData[Object.keys(data.playerData)[i]].username);
         }
     }
+    props.push(new Feeder(data.feederInfo.posX,data.feederInfo.posY,data.feederInfo.radius))
+    for(let i in data.food)
+    {
+        food[i]= new Food( data.food[i].posX, data.food[i].posY,"b",i, data.food[i].radius);
+    }
+    
     console.log("coming")
     console.log(clients)
     CreateMap()
@@ -77,6 +88,14 @@ socket.on("localPlayerMovement", (x, y) =>
     mainPlayer.y = y;
 })
 
+socket.on("promptQuestion" ,(prompt, id, foodId ) =>
+{
+    prompted = true; 
+    promptFoodId = foodId;
+    currentQuestionId = id;
+    document.getElementById("QuestionPrompt").innerHTML = prompt;
+    document.getElementById("questionContianer").style.display = "inline"
+})
 socket.on("renderMessage",(username,message)=>
 {
     RenderMessage(username,message)
@@ -93,6 +112,25 @@ socket.on("playerInput", (id,x, y) =>
     clients[id].x = x; 
     clients[id].y = y;
     console.log(id)
+})
+
+socket.on("foodUpdate" ,(id,x,y) =>
+{
+    food[id].x = x;
+    food[id].y = y
+})
+
+socket.on("qResponse", (pass) =>
+{
+    document.getElementById("questionContianer").style.display = "none"
+    if(pass)
+    {
+        prompted = false; 
+    }
+    else 
+    {
+        setTimeout(() =>{prompted = false}, 5000)
+    }
 })
 
 socket.on("playerDisconnect", (id) =>
@@ -149,6 +187,29 @@ function SendMessageDOM()
     
 }
 
+
+
+function ansA()
+{
+    socket.emit("answer", 0, currentQuestionId,promptFoodId)
+}
+
+function ansB()
+{
+    
+    socket.emit("answer", 1, currentQuestionId,promptFoodId)
+}
+function ansC()
+{
+    socket.emit("answer", 2, currentQuestionId,promptFoodId)
+    
+}
+function ansD()
+{
+    socket.emit("answer", 3, currentQuestionId,promptFoodId)
+    
+}
+
 class MainPlayer
 {
     constructor(x, y, color,username)
@@ -172,6 +233,67 @@ class MainPlayer
     }
 }
 
+class Food
+{
+    constructor(x,y, symbol, id,rad)
+    {
+        this.x = x; 
+        this.y = y; 
+        this.symbol = symbol;
+        this.id = id; 
+        this.rad = rad
+    }
+
+    RenderOb(pX,pY)
+    {
+        fill(94,94,94,150)
+        circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
+        textSize(24)
+        text("🍕",windowW/2+(pX -this.x) ,windowH/2+(pY -this.y))
+    }
+}
+class Feeder
+{
+    constructor(x, y, radius)
+    {
+        this.x = x;
+        this.y = y;
+        this.iter1 = 0;
+        this.iter2 = 50;
+        this.iter3 = 100;
+        this.rad = radius;
+    }
+
+    RenderOb(pX,pY)
+    {
+        
+        fill(this.iter1,this.iter2,this.iter3)
+        if(this.iter1 == 255)
+        {
+            this.iter1 = 0;
+        }
+        else 
+        {
+            this.iter1 += 1;
+        }
+        if(this.iter2 == 255)
+        {
+            this.iter2 = 0;
+        }
+        else 
+        {
+            this.iter2 += 1;
+        }if(this.iter3 == 255)
+        {
+            this.iter3 = 0;
+        }
+        else 
+        {
+            this.iter3 += 1;
+        }
+        circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
+    }
+}
 
 class Players
 {
@@ -297,9 +419,14 @@ function draw()
             clients[Object.keys(clients)[i]].RenderOb(mainPlayer.x, mainPlayer.y);
         }
     }
-    if(inputState)
+    for(let i = 0; i < Object.keys(food).length; i++)
     {
-        const keys = [keyIsDown(87),keyIsDown(83),keyIsDown(65),keyIsDown(68),keyIsDown(16)];
+        food[Object.keys(food)[i]].RenderOb(mainPlayer.x, mainPlayer.y);
+        
+    }
+    if(inputState && !prompted)
+    {
+        const keys = [keyIsDown(87),keyIsDown(83),keyIsDown(65),keyIsDown(68),keyIsDown(16),keyIsDown(32)];
         if(keys.includes(true))
         {
             socket.emit("playerInput", keys, socket.id)
@@ -354,7 +481,7 @@ function draw()
         }
     }
     
-    document.getElementById("locationCoord").innerHTML = `Position: (${mainPlayer.x.toFixed(2)}, ${mainPlayer.y.toFixed(2)})`
+    document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})`
 }
 
 function CreateMap()

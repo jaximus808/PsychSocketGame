@@ -19,19 +19,29 @@
     
     <div id="chatArea" style="width: 20%; height: 30%; background-color: rgba(186, 186, 186,0.4); position: absolute; right: 200px;z-index: 5;">
       <div id="chatContianer" style="background-color: rgba(92, 92, 92,0.4); width:98%; height:73%; margin-left: 1% ;margin-top: 1% ;"  id="chatContianer"></div>
-      <div id="inputArea" style="background-color:rgba(92, 92, 92,0.4) ;height:20%; width:98%; margin-left: 1%;margin-top: 2%;">
+      <div id="inputArea" style="background-color:rgba(92, 92, 92,0.4) ;height:20%; width:97%; margin-left: 1%;margin-top: 2%;">
         <label  novalidate for="inp" class="inp" >
           <input class="inputMessage" style="margin-left: 1%;"type="text" id="inp" placeholder="message" pattern=".{6,}" required>
-          <svg margin-left="1%"width="60%" height="18px" viewBox="0 0 280 18" class="border">
+          <svg margin-left="1%"width="100%" height="18px" viewBox="0 0 280 18" class="border">
             <path d="M0,12 L223.166144,12 C217.241379,12 217.899687,12 225.141066,12 C236.003135,12 241.9279,12 249.827586,12 C257.727273,12 264.639498,12 274.514107,12 C281.097179,12 281.755486,12 276.489028,12"></path>
           </svg>
           
         </label>
         
-      <button onclick="SendMessageDOM()" class="btn">Send</button>
+      <!-- <button onclick="SendMessageDOM()" class="btn">Send</button> -->
       </div>
     </div>
-    
+    <div id="questionContianer" style="display: none;">
+      <p style="margin:5%;">Question:</p>
+      <p style="word-wrap: break-word; margin-left: 5%;" id="QuestionPrompt"></p>
+      <div style="margin-left: 15%;">
+        <button style="margin:5%;"onclick="ansA()" class="answerButton">A</button>
+        <button style="margin:5%;"onclick="ansB()" class="answerButton">B</button>
+        <button style="margin:5%;"onclick="ansC()" class="answerButton">C</button>
+        <button style="margin:5%;"onclick="ansD()" class="answerButton">D</button>
+      </div>
+      
+    </div>
     <script src="GameManager.js"></script>
     <script src="communicator.js"></script>
   </body>
