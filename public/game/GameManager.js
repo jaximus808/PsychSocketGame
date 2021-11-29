@@ -7,12 +7,17 @@ var windowW = window.innerWidth*0.6
 var rad = 10;
 
 var xColors = [[255,0,0],[0,0,255],[214, 116, 211], [52,155,7],[221,205,13]]
+var teamName = ["Red","Blue","Yellow", "Green"]
 
 const speed = 5;
 
 let gameState = 0; 
 
 let bg;
+
+let timerCurrent = 0; 
+
+let timerOb;
 
 let inputState = true; 
 
@@ -25,6 +30,7 @@ let food = {};
 let currentQuestionId; 
 let promptFoodId; 
 var MAP; 
+let foodSymbols = ["🍕","🌭","🍗","🥞","🍣","🍞","🍙"]
 
 const colorArray = [[133, 31, 24], [20, 24, 120], [179, 159, 29], [31, 173, 79]]
 
@@ -39,6 +45,7 @@ socket.on("test",(message) =>
 {
   document.getElementById("test").innerHTML = message
   })
+
 
 socket.on("redirectHome", ()=>
 {
@@ -73,13 +80,26 @@ socket.on("GameInformation", (data) =>
     props.push(new Feeder(data.feederInfo.posX,data.feederInfo.posY,data.feederInfo.radius))
     for(let i in data.food)
     {
-        food[i]= new Food( data.food[i].posX, data.food[i].posY,"b",i, data.food[i].radius);
+        food[i]= new Food( data.food[i].posX, data.food[i].posY,foodSymbols[data.food[i].symbol],i, data.food[i].radius);
     }
-    
-    console.log("coming")
+    document.getElementById("Timer").innerHTML = "Time Left: " + data.timer ;
+    if(gameState == 1)
+    {
+        document.getElementById("Gamestate").innerHTML = "Game in Progress"
+    }
+    for(let i in data.teamData)
+    {
+        console.log(i)
+        document.getElementById(`team${parseInt(i)+1}Points`).innerHTML = `${teamName[i]} Points: ${data.teamData[i].points}`
+    }
     console.log(clients)
     CreateMap()
     gameState = 1;
+})
+
+socket.on("teamPointUpdates",(id, points)=>
+{
+    document.getElementById(`team${parseInt(id)+1}Points`).innerHTML = `${teamName[id]} Points: ${points}`
 })
 
 socket.on("localPlayerMovement", (x, y) =>
@@ -96,6 +116,20 @@ socket.on("promptQuestion" ,(prompt, id, foodId ) =>
     document.getElementById("QuestionPrompt").innerHTML = prompt;
     document.getElementById("questionContianer").style.display = "inline"
 })
+
+socket.on("startGame",(_timer) =>
+{
+    timerCurrent = _timer;
+    document.getElementById("Timer").innerHTML = `Time Left: ${_timer} seconds`; 
+    timerOb = setInterval(() =>
+    {
+        timerCurrent -= 1;
+        document.getElementById("Timer").innerHTML = `Time Left: ${timerCurrent} seconds `; 
+    }, 1000)
+    
+    document.getElementById("Gamestate").innerHTML = "Game is in Progress"
+})
+
 socket.on("renderMessage",(username,message)=>
 {
     RenderMessage(username,message)
@@ -119,6 +153,14 @@ socket.on("foodUpdate" ,(id,x,y) =>
     food[id].x = x;
     food[id].y = y
 })
+socket.on("resetGame", ()=>
+{
+    document.getElementById("Gamestate").innerHTML = "Game is waiting for host to start";
+    prompted = false; 
+    food = {};
+    clearInterval(timerOb)
+    document.getElementById("Timer").innerHTML = "Time Left:";
+})
 
 socket.on("qResponse", (pass) =>
 {
@@ -133,11 +175,22 @@ socket.on("qResponse", (pass) =>
     }
 })
 
+socket.on("spawnFood",(foodData,foodId) =>
+{
+    food[foodId]= new Food( foodData.posX, foodData.posY,foodSymbols[foodData.symbol],foodId, foodData.radius);
+})
+
+socket.on("removeFood",(id) =>
+{
+    delete food[id]
+})
+
 socket.on("playerDisconnect", (id) =>
 {
     delete clients[id]
     document.getElementById("playersCount").innerHTML = `Players: ${Object.keys(clients).length}`
 })
+
 
 window.onresize = () =>{
     
@@ -249,7 +302,7 @@ class Food
         fill(94,94,94,150)
         circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
         textSize(24)
-        text("🍕",windowW/2+(pX -this.x) ,windowH/2+(pY -this.y))
+        text(this.symbol,windowW/2+(pX -this.x) ,windowH/2+(pY -this.y))
     }
 }
 class Feeder

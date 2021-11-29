@@ -12,7 +12,7 @@ module.exports = class GameManager
     this.bree = require("bree");
     this.currentGameJob;
     this.gameTimer = 0;
-    this.timeLength = 300
+    this.timeLength = 30 //300
     this.food ={}; 
     //A = 0, B = 1, C = 2, D = 3
     this.questions =
@@ -58,7 +58,10 @@ module.exports = class GameManager
         map: this.map,
         playerData: this.playerGameInformation,
         feederInfo: this.feederSpawn,
-        food: this.food
+        food: this.food,
+        teamData: this.teamData,
+        timer: this.gameTimer,
+        gameState: this.gamestate
       }))
       socket.broadcast.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `${cookies.usernameSet} has joined!` )
       
@@ -73,7 +76,7 @@ module.exports = class GameManager
           socket.emit("qResponse", true)
           socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `You got that correct! Bring your food home solider!` )
           this.playerGameInformation[socket.id].heldFoodId = foodId
-
+          if(this.food[this.playerGameInformation[socket.id].heldFoodId]) return; 
           this.food[this.playerGameInformation[socket.id].heldFoodId].posX =  this.playerGameInformation[socket.id].posX
           this.food[this.playerGameInformation[socket.id].heldFoodId].posY =  this.playerGameInformation[socket.id].posY +25
           this.food[this.playerGameInformation[socket.id].heldFoodId].state = 1
@@ -144,6 +147,7 @@ module.exports = class GameManager
     this.teamSpawns = {}; 
     this.feederSpawn = {}; 
     this.xCount = map.length/34; 
+    this.iterate = 0;
     this.SetMapElements();
   }
 
@@ -167,43 +171,93 @@ module.exports = class GameManager
       posY: ((this.map.length/this.xCount) * this.obSize)/2,
       radius: 200
     }
-    this.food[0] = {
-      posX: this.xCount*this.obSize/2,
-      posY: ((this.map.length/this.xCount) * this.obSize)/2,
-      radius: 30,
-      state: 0,
-      //0 means ready to be grabbed and will prompt,
-      //1 means being carried
-    }
-    this.food[1] = {
-      posX: this.xCount*this.obSize/2+50,
-      posY: ((this.map.length/this.xCount) * this.obSize)/2,
-      radius: 30,
-      state: 0,
-      //0 means ready to be grabbed and will prompt,
-      //1 means being carried
-    }
+    
+    
     console.log(this.teamSpawns)
   }
   StartGame()
   {
     this.gameTimer = this.timeLength; 
     
-    // this.currentGameJob = new this.bree(
-    //   {
-    //     jobs:[
-    //       {
-    //         name:"GameTimer",
-    //         interval: "1s",
-    //       }
-    //     ],
-    //     workerMessageHandler: ()=>
-    //     {
-    //       this.gameTimer -= 1;
-    //     }
+    this.currentGameJob = new this.bree(
+      {
+        jobs:[
+          {
+            name:"GameTimer",
+            interval: "1s",
+          }
+        ],
+        workerMessageHandler: (name,args)=>
+        {
+          this.gameTimer -= 1;
+          console.log(this.gameTimer )
+          if(this.gameTimer == 0)
+          {
+            let hi = 0; 
+            for(let i in this.teamData)
+            {
+              if(this.teamData[i].points > hi) hi = this.teamData[i].points
+            }
+            let victoryRoyale = "";
+            let first = true; 
+            let teamAnnouce = "Team"
+            for(let i in this.teamData)
+            {
+              if(this.teamData[i].points == hi) 
+              {
+                if(first)
+                {
+                  victoryRoyale += `${this.playerManager.TeamData[i].name}`
+                  first = false;
+                } 
+                else 
+                {
+                  teamAnnouce = "Teams"
+                  victoryRoyale += `, ${this.playerManager.TeamData[i].name}`
+                }
+                
+              }
+              
+            } 
+            this.food = {};
+            
+            this.io.emit("renderMessage", "<span style='color:#db46e8'>Server (to all)</span>", `GAME OVER!`)
+            this.io.emit("renderMessage", "<span style='color:#db46e8'>Server (to all)</span>", `${teamAnnouce}: ${victoryRoyale} has won!`)
+            
+            this.currentGameJob.stop();
+            this.currentGameJob = undefined;
+            this.gamestate = 0; 
+            this.io.emit("resetGame")
+            return;
+          }
+          
+          this.iterate++;
+          if(this.iterate == 5)
+          {
+            console.log("cock")
+            if(Object.keys(this.food).length <6)
+            {
+              const newFood ={
+                posX: this.xCount*this.obSize/2 + 60*(Math.random()*2 -1),
+                posY: ((this.map.length/this.xCount) * this.obSize)/2+ 60*(Math.random()*2 -1),
+                radius: 30,
+                state: 0,
+                symbol: Math.floor(Math.random()*7)
+                //0 means ready to be grabbed and will prompt,
+                //1 means being carried
+              }
+              const foodId = Object.keys(this.food).length
+              this.food[foodId] = newFood
+              
+              this.io.emit("spawnFood", newFood,foodId)
+            }
+            this.iterate = 0;
+          }
+        }
 
-    //   }
-    // )
+      }
+    )
+    this.currentGameJob.start()
     this.teamData = 
     {
       0:{
@@ -227,7 +281,6 @@ module.exports = class GameManager
       this.io.emit("playerInput",id,this.playerGameInformation[id].posX,this.playerGameInformation[id].posY)
     }
     this.io.emit("startGame",(this.gameTimer))
-    return [this.gameTimer,]
   }
   Movement(keys,id,socket)
   {
@@ -235,23 +288,40 @@ module.exports = class GameManager
     // let tempY = this.playerGameInformation[socket.id].posY;
     
     const playerInfo = this.playerGameInformation[id];
-    if(keys[5])
+    if(keys[5] )
     {
-      //cehck for collison 
-      for(let i in this.food)
+      if(playerInfo.heldFoodId <0)
       {
-        console.log(i)
-        const food = this.food[i]
-        if(Math.sqrt((food.posX - playerInfo.posX)**2 +(food.posX - playerInfo.posX)**2) < food.radius && food.state == 0)
+        for(let i in this.food)
         {
-          console.log("collide")
-          let qID = Math.floor(Math.random()*Object.keys(this.questions).length)
-          socket.emit("promptQuestion", this.questions[qID].prompt, qID, i );
-          return; 
+          const food = this.food[i]
+          if(Math.sqrt((food.posX - playerInfo.posX)**2 +(food.posY - playerInfo.posY)**2) < food.radius && food.state == 0)
+          {
+            let qID = Math.floor(Math.random()*Object.keys(this.questions).length)
+            socket.emit("promptQuestion", this.questions[qID].prompt, qID, i );
+            return; 
+          }
+          
         }
-        
       }
-      console.log("not colliding")
+      else
+      {
+        const teamId = playerInfo.teamId
+        if(Math.sqrt((playerInfo.posX - this.teamSpawns[teamId].posX)**2 +(playerInfo.posY - this.teamSpawns[teamId].posY)**2) < 70 )
+        {
+          this.teamData[teamId].points += 1;
+          this.io.emit("renderMessage", "<span style='color:#db46e8'>Server (to all)</span>", `${this.playerGameInformation[id].username} has scored a point for team ${this.playerManager.TeamData[teamId].name}!`)
+          this.io.emit("removeFood",playerInfo.heldFoodId )
+          this.io.emit("teamPointUpdates", teamId,this.teamData[teamId].points)
+          this.playerGameInformation[id].heldFoodId = -1;
+          delete this.food[playerInfo.heldFoodId] 
+        }
+          
+        
+        console.log("not colliding with hill")
+      }
+      //cehck for collison 
+      
     }
     
     let width = 20;
@@ -301,7 +371,9 @@ module.exports = class GameManager
     {
       this.food[playerInfo.heldFoodId].posX =  playerInfo.posX
       this.food[playerInfo.heldFoodId].posY =  playerInfo.posY +25
-      this.io.emit("foodUpdate", playerInfo.heldFoodId,this.food[playerInfo.heldFoodId].posX,this.food[playerInfo.heldFoodId].posY )
+      
+      
+      if(this.food[playerInfo.heldFoodId]) this.io.emit("foodUpdate", playerInfo.heldFoodId,this.food[playerInfo.heldFoodId].posX,this.food[playerInfo.heldFoodId].posY )
     }
    
 
