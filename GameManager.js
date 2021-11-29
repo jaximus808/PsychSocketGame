@@ -12,7 +12,7 @@ module.exports = class GameManager
     this.bree = require("bree");
     this.currentGameJob;
     this.gameTimer = 0;
-    this.timeLength = 30 //300
+    this.timeLength = 300 //300
     this.food ={}; 
     //A = 0, B = 1, C = 2, D = 3
     this.questions =
@@ -21,6 +21,42 @@ module.exports = class GameManager
       {
         prompt:"Why might removing food cues help with waist management? <br>A: Out of sight out of mind, <br>B: if we eat less then we create less waist, <br> C: The sight of food triggers the hippothalamus that makes it harder to manage waist<br>D: It is from our caveman times ",
         ans: 0
+      },
+      1:
+      {
+        prompt:"As hours of TV watched, skinfold fat measure_____<br>A: Decreases<br>B: Increases<br>C: Doesn't Changed<br>D: Kind of Decreases",
+        ans: 1
+      },
+      2:
+      {
+        prompt:"Boys are more likely than girls to have a greater measure of skinfold fat?<br>A: True<br>B: False<br>C: I don't know<br>D: Among us",
+        ans: 1
+      },
+      3:
+      {
+        prompt: "Why does exercising help with waist management?<br>A: It burns calories<br>B: It unclogs our rectum track and creates a smoother handling of waste<br>C: It empties fat cells, builds muscle, speeds up metabolism, and lowers set point<br>D: It makes our stomach acid be more efficent when handling food intake",
+        ans: 2
+      },
+      4:
+      {
+        prompt: "Eating slow can lead to eating ____ <br>A: more<br>B: the same amount<br>C: I don't know<br>D: less",
+        ans: 3
+      },
+      5:
+      {
+        //fix this
+        prompt: "Name one cultural factors that influences hunger:<br>A: preference cultural<br>B: race<br>C: nothing<br>D: difference in taste buds",
+        ans: 0
+      },
+      6:
+      {
+        prompt: "What is neophobia?<br>A: Neophobia is the liking of unfamillar things<br>B: Neophobia is the liking of famillar things<br>C: Neophobia is the dislike of unfamillar things<br>D: Neophobia is the dislike of famillar things",
+        ans: 2
+      },
+      6:
+      {
+        prompt: "What category (cultural or situtational) does social faclitation fall in, and how does influence hunger?<br>A: cultural - Our heritage influences our hunger<br>B: situtational - We tend to eat less with more people around us<br>C: cultural - The people we live with influences our hunger<br>D: situational - We tend to eat more with more people around us",
+        ans: 3
       }
     }
 
@@ -246,9 +282,16 @@ module.exports = class GameManager
                 //0 means ready to be grabbed and will prompt,
                 //1 means being carried
               }
-              const foodId = Object.keys(this.food).length
-              this.food[foodId] = newFood
+              console.log(Object.keys(this.food))
+              let foodId = 0
+              if(Object.keys(this.food).length > 0)
+              {
+                foodId = parseInt(Object.keys(this.food)[Object.keys(this.food).length-1]) +1;
+              }
               
+              // const foodId = 1
+              this.food[foodId] = newFood
+              console.log(this.food)
               this.io.emit("spawnFood", newFood,foodId)
             }
             this.iterate = 0;
@@ -297,6 +340,7 @@ module.exports = class GameManager
           const food = this.food[i]
           if(Math.sqrt((food.posX - playerInfo.posX)**2 +(food.posY - playerInfo.posY)**2) < food.radius && food.state == 0)
           {
+            console.log(Object.keys(this.questions).length)
             let qID = Math.floor(Math.random()*Object.keys(this.questions).length)
             socket.emit("promptQuestion", this.questions[qID].prompt, qID, i );
             return; 
@@ -313,8 +357,9 @@ module.exports = class GameManager
           this.io.emit("renderMessage", "<span style='color:#db46e8'>Server (to all)</span>", `${this.playerGameInformation[id].username} has scored a point for team ${this.playerManager.TeamData[teamId].name}!`)
           this.io.emit("removeFood",playerInfo.heldFoodId )
           this.io.emit("teamPointUpdates", teamId,this.teamData[teamId].points)
-          this.playerGameInformation[id].heldFoodId = -1;
           delete this.food[playerInfo.heldFoodId] 
+          this.playerGameInformation[id].heldFoodId = -1;
+          
         }
           
         
@@ -367,7 +412,7 @@ module.exports = class GameManager
         playerInfo.posX = tempX
       }
     }
-    if(playerInfo.heldFoodId > -1)
+    if(playerInfo.heldFoodId > -1&&this.food[playerInfo.heldFoodId])
     {
       this.food[playerInfo.heldFoodId].posX =  playerInfo.posX
       this.food[playerInfo.heldFoodId].posY =  playerInfo.posY +25
