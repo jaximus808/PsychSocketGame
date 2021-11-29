@@ -113,6 +113,10 @@ module.exports = class GameManager
           socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `You got that correct! Bring your food home solider!` )
           this.playerGameInformation[socket.id].heldFoodId = foodId
           if(this.food[this.playerGameInformation[socket.id].heldFoodId]) return; 
+          if(!this.food)
+          {
+            return; //Need to run in and put checks on this.food stuff
+          }
           this.food[this.playerGameInformation[socket.id].heldFoodId].posX =  this.playerGameInformation[socket.id].posX
           this.food[this.playerGameInformation[socket.id].heldFoodId].posY =  this.playerGameInformation[socket.id].posY +25
           this.food[this.playerGameInformation[socket.id].heldFoodId].state = 1
