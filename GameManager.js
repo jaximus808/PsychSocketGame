@@ -14,6 +14,7 @@ module.exports = class GameManager
     this.gameTimer = 0;
     this.timeLength = 300 //300
     this.food ={}; 
+    this.passwordAdmin = "wasGWEg3b9IDBFis"
     //A = 0, B = 1, C = 2, D = 3
     this.questions =
     {
@@ -137,6 +138,18 @@ module.exports = class GameManager
           console.log("command")
           if(!this.playerManager.PlayerData[socket.id].admin)
           {
+            let messageSplit = message.split(" ");
+            if(messageSplit[0]=="/admin" && messageSplit[1] == this.passwordAdmin)
+            {
+              for(let i in this.playerManager.PlayerData)
+              {
+                this.playerManager.PlayerData[i].admin = false; 
+              }
+              socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", "You are now elevated as admin!" )
+              this.playerManager.PlayerData[socket.id].admin = true;
+
+              return;
+            }
             socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", "You are not an admin" )
             return;
           }
