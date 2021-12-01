@@ -16,50 +16,7 @@ module.exports = class GameManager
     this.food ={}; 
     this.passwordAdmin = "wasGWEg3b9IDBFis"
     //A = 0, B = 1, C = 2, D = 3
-    this.questions =
-    {
-      0:
-      {
-        prompt:"Why might removing food cues help with waist management? <br>A: Out of sight out of mind, <br>B: if we eat less then we create less waist, <br> C: The sight of food triggers the hippothalamus that makes it harder to manage waist<br>D: It is from our caveman times ",
-        ans: 0
-      },
-      1:
-      {
-        prompt:"As hours of TV watched, skinfold fat measure_____<br>A: Decreases<br>B: Increases<br>C: Doesn't Changed<br>D: Kind of Decreases",
-        ans: 1
-      },
-      2:
-      {
-        prompt:"Boys are more likely than girls to have a greater measure of skinfold fat?<br>A: True<br>B: False<br>C: I don't know<br>D: Among us",
-        ans: 1
-      },
-      3:
-      {
-        prompt: "Why does exercising help with waist management?<br>A: It burns calories<br>B: It unclogs our rectum track and creates a smoother handling of waste<br>C: It empties fat cells, builds muscle, speeds up metabolism, and lowers set point<br>D: It makes our stomach acid be more efficent when handling food intake",
-        ans: 2
-      },
-      4:
-      {
-        prompt: "Eating slow can lead to eating ____ <br>A: more<br>B: the same amount<br>C: I don't know<br>D: less",
-        ans: 3
-      },
-      5:
-      {
-        //fix this
-        prompt: "Name one cultural factors that influences hunger:<br>A: preference cultural<br>B: race<br>C: nothing<br>D: difference in taste buds",
-        ans: 0
-      },
-      6:
-      {
-        prompt: "What is neophobia?<br>A: Neophobia is the liking of unfamillar things<br>B: Neophobia is the liking of famillar things<br>C: Neophobia is the dislike of unfamillar things<br>D: Neophobia is the dislike of famillar things",
-        ans: 2
-      },
-      6:
-      {
-        prompt: "What category (cultural or situtational) does social faclitation fall in, and how does influence hunger?<br>A: cultural - Our heritage influences our hunger<br>B: situtational - We tend to eat less with more people around us<br>C: cultural - The people we live with influences our hunger<br>D: situational - We tend to eat more with more people around us",
-        ans: 3
-      }
-    }
+    this.questions = require("./Questions")
 
     //this.collision = new require("detect-collisions")();
     this.teamData = 
