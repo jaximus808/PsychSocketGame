@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const express = require(`express`);
 const app = express();
 const socketio = require(`socket.io`);
@@ -39,7 +42,7 @@ app.use("/ingame", (req,res,next) =>
 
 }, express.static(path.join(__dirname,"public", "game")))
 
-server.listen(3000, console.log(`Server up`))
+server.listen(process.env.PORT, console.log(`Server up`))
 // playerManager.PlayerConnect(`jwwqs`,`swag`)
 
 // playerManager.PlayerDisconnect(`jwwqs`)
