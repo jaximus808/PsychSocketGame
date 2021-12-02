@@ -60,6 +60,7 @@ socket.on("GameInformation", (data) =>
     //send this from server later
     xCount = MAP.length/34; 
     // mainPlayer = new MainPlayer(data.localPlayerData.posX, data.localPlayerData.posY,5);
+    client = {}  
     console.log(Object.keys(data.playerData))
     document.getElementById("playersCount").innerHTML = `Players: ${Object.keys(data.playerData).length}`
     for(let i = 0; i < Object.keys(data.playerData).length; i++)
@@ -67,14 +68,14 @@ socket.on("GameInformation", (data) =>
         if(Object.keys(data.playerData)[i] == socket.id)
         {
             console.log(data.playerData[Object.keys(data.playerData)[i]].teamId)
-            clients[Object.keys(data.playerData)[i]] = new MainPlayer(data.playerData[Object.keys(data.playerData)[i]].posX, data.playerData[Object.keys(data.playerData)[i]].posY,playerColorArray[data.playerData[Object.keys(data.playerData)[i]].teamId],data.playerData[Object.keys(data.playerData)[i]].username);
+            clients[Object.keys(data.playerData)[i]] = new MainPlayer(data.playerData[Object.keys(data.playerData)[i]].posX, data.playerData[Object.keys(data.playerData)[i]].posY,playerColorArray[data.playerData[Object.keys(data.playerData)[i]].teamId],data.playerData[Object.keys(data.playerData)[i]].username,data.playerData[Object.keys(data.playerData)[i]].teamId);
             mainPlayer = clients[Object.keys(data.playerData)[i]];
         }
         else 
         {
             
             console.log(Object.keys(data.playerData)[i])
-            clients[Object.keys(data.playerData)[i]] = new Players(data.playerData[Object.keys(data.playerData)[i]].posX, data.playerData[Object.keys(data.playerData)[i]].posY, playerColorArray[data.playerData[Object.keys(data.playerData)[i]].teamId],data.playerData[Object.keys(data.playerData)[i]].username);
+            clients[Object.keys(data.playerData)[i]] = new Players(data.playerData[Object.keys(data.playerData)[i]].posX, data.playerData[Object.keys(data.playerData)[i]].posY, playerColorArray[data.playerData[Object.keys(data.playerData)[i]].teamId],data.playerData[Object.keys(data.playerData)[i]].username,data.playerData[Object.keys(data.playerData)[i]].teamId);
         }
     }
     props.push(new Feeder(data.feederInfo.posX,data.feederInfo.posY,data.feederInfo.radius))
@@ -92,6 +93,7 @@ socket.on("GameInformation", (data) =>
         console.log(i)
         document.getElementById(`team${parseInt(i)+1}Points`).innerHTML = `${teamName[i]} Points: ${data.teamData[i].points}`
     }
+    DisplayCurrentTeams()
     console.log(clients)
     CreateMap()
     gameState = 1;
@@ -137,8 +139,9 @@ socket.on("renderMessage",(username,message)=>
 
 socket.on("newPlayerConnection", (id,x,y,teamId,username) =>
 {
-    clients[id] = new Players(x,y, playerColorArray[teamId],username)
+    clients[id] = new Players(x,y, playerColorArray[teamId],username,teamId)
     document.getElementById("playersCount").innerHTML = `Players: ${Object.keys(clients).length}`
+    DisplayCurrentTeams()
 })
 
 socket.on("playerInput", (id,x, y) =>
@@ -188,6 +191,7 @@ socket.on("removeFood",(id) =>
 socket.on("playerDisconnect", (id) =>
 {
     delete clients[id]
+    DisplayCurrentTeams()
     document.getElementById("playersCount").innerHTML = `Players: ${Object.keys(clients).length}`
 })
 
@@ -240,6 +244,20 @@ function SendMessageDOM()
     
 }
 
+function DisplayCurrentTeams()
+{
+  let playerString = "Team Memebers:";
+  let i = 1;
+  for(const i in clients)
+  {
+    if(clients[i].teamId == mainPlayer.teamId)
+    {
+      playerString += `<br>${i}. ${clients[i].username}`
+      i++
+    }
+  }
+  document.getElementById("teamMembers").innerHTML = playerString
+}
 
 
 function ansA()
@@ -265,7 +283,7 @@ function ansD()
 
 class MainPlayer
 {
-    constructor(x, y, color,username)
+    constructor(x, y, color,username,teamId)
     {
         this.displayX = windowW/2
         this.displayY = windowH/2
@@ -274,6 +292,7 @@ class MainPlayer
         this.color = color; 
         this.width = 20;
         this.username = username
+        this.teamId = teamId
     }
 
     RenderOb()
@@ -353,13 +372,14 @@ class Feeder
 
 class Players
 {
-    constructor(x,y, color,username)
+    constructor(x,y, color,username,teamId)
     {
         this.x = x;
         this.y = y;
         this.color = color;
         this.width = 20
         this.username = username
+        this.teamId = teamId
     }
     RenderOb(pX, pY)
     {
@@ -530,42 +550,43 @@ function draw()
         width = 20
         
         let curSpeed = speed;
-        if(keys[0])
-        {
-            if(keyIsDown(16)) curSpeed*=2;
-            let tempY = mainPlayer.y+ curSpeed;
-            if(MAP[Math.floor((tempY+width*2)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-5)/obSize)] != 1 &&MAP[Math.floor((tempY+width*2)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-10)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-20)/obSize)] != 1)
-            {
-                mainPlayer.y = tempY
-            }
-        }
-        //s
-        if(keys[1])
-        {
-          let tempY = mainPlayer.y- curSpeed;
-          if(MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-5)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.posX+width*2-10)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-20)/obSize)] != 1)
-          {
-            mainPlayer.y = tempY
-          }
-        }
-        //a
-        if(keys[2])
-        {
-          let tempX = mainPlayer.x+ curSpeed;
-          if(MAP[Math.floor((mainPlayer.y+width)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+10)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+15)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1)
-          {
-            mainPlayer.x = tempX
-          }
-        }
-        //d
-        if(keys[3])
-        {
-          let tempX = mainPlayer.x- curSpeed;
-          if(MAP[Math.floor((mainPlayer.y+width)/obSize)*xCount + Math.floor((tempX+width)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+5)/obSize)*xCount + Math.floor((tempX+width)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+15)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1)
-          {
-            mainPlayer.x = tempX
-          }
-        }
+        //lmao k
+        // if(keys[0])
+        // {
+        //     if(keyIsDown(16)) curSpeed*=2;
+        //     let tempY = mainPlayer.y+ deltaTime/curSpeed;
+        //     if(MAP[Math.floor((tempY+width*2)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-5)/obSize)] != 1 &&MAP[Math.floor((tempY+width*2)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-10)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-20)/obSize)] != 1)
+        //     {
+        //         mainPlayer.y = tempY
+        //     }
+        // }
+        // //s
+        // if(keys[1])
+        // {
+        //   let tempY = mainPlayer.y- deltaTime/curSpeed;
+        //   if(MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-5)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.posX+width*2-10)/obSize)] != 1&&MAP[Math.floor((tempY+width)/obSize)*xCount + Math.floor((mainPlayer.x+width*2-20)/obSize)] != 1)
+        //   {
+        //     mainPlayer.y = tempY
+        //   }
+        // }
+        // //a
+        // if(keys[2])
+        // {
+        //   let tempX = mainPlayer.x+deltaTime/ curSpeed;
+        //   if(MAP[Math.floor((mainPlayer.y+width)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+10)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+15)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1)
+        //   {
+        //     mainPlayer.x = tempX
+        //   }
+        // }
+        // //d
+        // if(keys[3])
+        // {
+        //   let tempX = mainPlayer.x-deltaTime/ curSpeed;
+        //   if(MAP[Math.floor((mainPlayer.y+width)/obSize)*xCount + Math.floor((tempX+width)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+5)/obSize)*xCount + Math.floor((tempX+width)/obSize)] != 1&&MAP[Math.floor((mainPlayer.y+width+15)/obSize)*xCount + Math.floor((tempX+width*2)/obSize)] != 1)
+        //   {
+        //     mainPlayer.x = tempX
+        //   }
+        // }
     }
     else 
     {

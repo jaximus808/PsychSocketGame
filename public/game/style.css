@@ -150,6 +150,22 @@ body {
   transform: translateY(2px);
 }
 
+#infoBlock
+{
+  background-color: rgba(0,0,0,0.4);
+  width:16%;
+  padding: 1%;
+  font-size: 20;
+  color:white;
+
+}
+#teamDisplay
+{
+  position: absolute;
+  right:7%;
+  top:1%
+}
+
 @-moz-keyframes elasticInput {
   33% {
     d: path("M0,12 L226,12 C220,12 220.666667,12 228,12 C239,12 245,1 253,1 C261,1 268,12 278,12 C284.666667,12 285.333333,12 280,12");
