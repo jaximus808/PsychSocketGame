@@ -18,7 +18,8 @@ module.exports = class GameManager
     //A = 0, B = 1, C = 2, D = 3
     this.questions = require("./Questions")
 
-    this.bonusSpawns = {}
+    this.bonusSpawn = {}
+    this.waterStrikes = {}
     this.bonusSelection =
     {
       0: 
@@ -28,7 +29,8 @@ module.exports = class GameManager
       },
       1:
       {
-        name:"Question "
+        name:"Question Demolition",
+        symbol: "?"
       }
     }
     //this.collision = new require("detect-collisions")();
@@ -68,7 +70,8 @@ module.exports = class GameManager
         food: this.food,
         teamData: this.teamData,
         timer: this.gameTimer,
-        gameState: this.gamestate
+        gameState: this.gamestate,
+        bonusSpawn: this.bonusSpawn
       }))
       socket.broadcast.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `${cookies.usernameSet} has joined!` )
       
@@ -174,6 +177,11 @@ module.exports = class GameManager
     this.SetMapElements();
   }
 
+  WaterStrike(playerId, teamId)
+  {
+    this.io.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `Team ${this.playerManager.TeamData[teamId]} Has Launched A Water Strike! Avoid the blue circles at all cost!` )
+  }
+
   SetMapElements()
   {
     for(let i = 0; i < this.map.length; i++)
@@ -194,7 +202,13 @@ module.exports = class GameManager
       posY: ((this.map.length/this.xCount) * this.obSize)/2,
       radius: 200
     }
-    
+    this.bonusSpawn = 
+    {
+      posX: this.xCount*this.obSize/2,
+      posY: ((this.map.length/this.xCount) * this.obSize)/2-this.feederSpawn.radius -20,
+      radius: 20,
+      appear: false
+    }
     
     console.log(this.teamSpawns)
   }
@@ -254,6 +268,16 @@ module.exports = class GameManager
             return;
           }
           
+          if(this.gameTimer%30 == 0 && this.gameTimer != this.timeLength)
+          {
+            //spawn the bonus :DDDD
+            if(!this.bonusSpawn.appear)
+            {
+              this.bonusSpawn.appear = true; 
+              io.emit("bonusSpawnUpdate", true)
+            }
+          }
+
           this.iterate++;
           //this could be really unbalanced
           // if(this.iterate == 30 )
@@ -425,7 +449,8 @@ module.exports = class GameManager
       posY: this.teamSpawns[_teamId].posY +(Math.random()*this.teamSpawns[_teamId].radSpawn)*(Math.random()*2-1),
       teamId: _teamId,
       username: _username,
-      heldFoodId:-1
+      heldFoodId:-,
+      alive:true1
     }
     this.playerGameInformation[_id] = data
     return data; 

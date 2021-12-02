@@ -30,6 +30,7 @@ let food = {};
 let currentQuestionId; 
 let promptFoodId; 
 var MAP; 
+let bonusSpawn;
 let foodSymbols = ["🍕","🌭","🍗","🥞","🍣","🍞","🍙"]
 
 const colorArray = [[133, 31, 24], [20, 24, 120], [179, 159, 29], [31, 173, 79]]
@@ -84,6 +85,8 @@ socket.on("GameInformation", (data) =>
         food[i]= new Food( data.food[i].posX, data.food[i].posY,foodSymbols[data.food[i].symbol],i, data.food[i].radius);
     }
     document.getElementById("Timer").innerHTML = "Time Left: " + data.timer ;
+    //fix
+    bonusSpawn = new Bonus(data.bonusSpawn.posX, data.bonusSpawn.posY, data.bonusSpawn.radius, data.bonusSpawn.appear)
     if(gameState == 1)
     {
         document.getElementById("Gamestate").innerHTML = "Game in Progress"
@@ -303,6 +306,26 @@ class MainPlayer
         fill(0,0,0)
         text("You",this.displayX ,this.displayY-this.width/2-20 )
     }
+}
+
+class Bonus
+{
+  constructor(x,y, rad,appear)
+  {
+    this.x = x; 
+    this.y = y; 
+    this.color = [255,215,0]
+    this.rad = rad;
+    this.appear = appear
+  }
+
+  RenderOb(pX,pY)
+  {
+    if(!this.appear) return
+    fill(255,215,0)
+    noStroke()
+    circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
+  }
 }
 
 class Food
