@@ -242,9 +242,13 @@ module.exports = class GameManager
           }
           
           this.iterate++;
+          //this could be really unbalanced
+          // if(this.iterate == 30 )
+          // {
+
+          // }
           if(this.iterate == 5)
           {
-            console.log("cock")
             if(Object.keys(this.food).length <6)
             {
               const newFood ={

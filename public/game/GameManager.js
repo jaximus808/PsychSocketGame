@@ -295,6 +295,7 @@ class Food
         this.symbol = symbol;
         this.id = id; 
         this.rad = rad
+        this.color = [5,5,5]
     }
 
     RenderOb(pX,pY)
@@ -315,12 +316,14 @@ class Feeder
         this.iter2 = 50;
         this.iter3 = 100;
         this.rad = radius;
+        this.color = [this.iter1,this.iter2,this.iter3]
     }
 
     RenderOb(pX,pY)
     {
         
         fill(this.iter1,this.iter2,this.iter3)
+        this.color = [this.iter1,this.iter2,this.iter3]
         if(this.iter1 == 255)
         {
             this.iter1 = 0;
@@ -424,7 +427,46 @@ class Background
     }
 }
 
+function createMiniMap()
+{
+  let margin = 20; 
+  let mapSizeBlock = 5;
+  
+  for(let y = 0; y < yCount; y++)
+  {
+    for(let x = 0; x < xCount; x++)
+    {
+      if(MAP[y*xCount + x] == 1)
+      {
+        stroke(2);
+        fill(color(255,0,0))
+        rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount- mapSizeBlock*y, mapSizeBlock+0.1,mapSizeBlock+0.1);
+      }
+      else
+      {
+        noStroke()
+        fill(color(255,255,255))
+        rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount-mapSizeBlock*y, mapSizeBlock+1,mapSizeBlock+1);
+      }
+    }
+  }
 
+  for(let i in props)
+  {
+    noStroke();
+    const curProps = props[i]
+    fill(color(curProps.color[0],curProps.color[1],curProps.color[2]))
+    circle(margin + (xCount*obSize-curProps.x)/13,margin+(yCount*obSize-curProps.y)/13,curProps.rad/13)
+  }
+
+  for(let i in clients)
+  {
+    stroke(2);
+    const curClient = clients[i]
+    fill(color(curClient.color[0],curClient.color[1],curClient.color[2]))
+    circle(margin + (xCount*obSize-curClient.x)/13,margin+(yCount*obSize-curClient.y)/13,4)
+  }
+}
 
 
 function setup()
@@ -533,7 +575,7 @@ function draw()
             SendMessageDOM();
         }
     }
-    
+    createMiniMap()
     document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})`
 }
 
