@@ -247,13 +247,13 @@ function SendMessageDOM()
 function DisplayCurrentTeams()
 {
   let playerString = "Team Memebers:";
-  let i = 1;
+  let c = 1;
   for(const i in clients)
   {
     if(clients[i].teamId == mainPlayer.teamId)
     {
-      playerString += `<br>${i}. ${clients[i].username}`
-      i++
+      playerString += `<br>${c}. ${clients[i].username}`
+      c++
     }
   }
   document.getElementById("teamMembers").innerHTML = playerString
