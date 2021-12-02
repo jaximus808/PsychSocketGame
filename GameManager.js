@@ -18,6 +18,19 @@ module.exports = class GameManager
     //A = 0, B = 1, C = 2, D = 3
     this.questions = require("./Questions")
 
+    this.bonusSpawns = {}
+    this.bonusSelection =
+    {
+      0: 
+      {
+        name: "Water Strike",
+        symbol: "🌊",
+      },
+      1:
+      {
+        name:"Question "
+      }
+    }
     //this.collision = new require("detect-collisions")();
     this.teamData = 
     {
@@ -401,6 +414,7 @@ module.exports = class GameManager
    
 
   }
+
 
   CreatePlayer(_id, _teamId,_username)
   {

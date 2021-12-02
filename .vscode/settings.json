@@ -1,0 +1,4 @@
+{
+    "appService.deploySubpath": ".",
+    "appService.defaultWebAppToDeploy": "/subscriptions/85308ddc-5916-4f8b-aeae-61ec8d52e624/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/PsychReviewGame"
+}
