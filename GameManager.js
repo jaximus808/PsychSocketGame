@@ -73,6 +73,7 @@ module.exports = class GameManager
         gameState: this.gamestate,
         bonusSpawn: this.bonusSpawn
       }))
+      console.log(this.bonusSpawn)
       socket.broadcast.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `${cookies.usernameSet} has joined!` )
       
       socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `Welcome to the Ant Game!` )
@@ -274,7 +275,7 @@ module.exports = class GameManager
             if(!this.bonusSpawn.appear)
             {
               this.bonusSpawn.appear = true; 
-              io.emit("bonusSpawnUpdate", true)
+              this.io.emit("bonusSpawnUpdate", true)
             }
           }
 
@@ -449,8 +450,8 @@ module.exports = class GameManager
       posY: this.teamSpawns[_teamId].posY +(Math.random()*this.teamSpawns[_teamId].radSpawn)*(Math.random()*2-1),
       teamId: _teamId,
       username: _username,
-      heldFoodId:-,
-      alive:true1
+      heldFoodId:-1,
+      alive:true
     }
     this.playerGameInformation[_id] = data
     return data; 

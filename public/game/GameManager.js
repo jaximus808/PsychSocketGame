@@ -107,6 +107,11 @@ socket.on("teamPointUpdates",(id, points)=>
     document.getElementById(`team${parseInt(id)+1}Points`).innerHTML = `${teamName[id]} Points: ${points}`
 })
 
+socket.on("bonusSpawnUpdate",(display)=>
+{
+  bonusSpawn.display = display
+})
+
 socket.on("localPlayerMovement", (x, y) =>
 {
     mainPlayer.x = x;
@@ -475,24 +480,34 @@ function createMiniMap()
   let margin = 20; 
   let mapSizeBlock = 5;
   
-  for(let y = 0; y < yCount; y++)
-  {
-    for(let x = 0; x < xCount; x++)
-    {
-      if(MAP[y*xCount + x] == 1)
-      {
-        stroke(2);
-        fill(color(255,0,0))
-        rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount- mapSizeBlock*y, mapSizeBlock+0.1,mapSizeBlock+0.1);
-      }
-      else
-      {
-        noStroke()
-        fill(color(255,255,255))
-        rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount-mapSizeBlock*y, mapSizeBlock+1,mapSizeBlock+1);
-      }
-    }
-  }
+  // for(let y = 0; y < yCount; y++)
+  // {
+  //   for(let x = 0; x < xCount; x++)
+  //   {
+  //     if(MAP[y*xCount + x] == 1)
+  //     {
+  //       stroke(2);
+  //       fill(color(255,0,0))
+  //       rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount- mapSizeBlock*y, mapSizeBlock+0.1,mapSizeBlock+0.1);
+  //     }
+  //     else
+  //     {
+  //       noStroke()
+  //       fill(color(255,255,255))
+  //       rect(margin +mapSizeBlock*xCount- mapSizeBlock*x, margin+mapSizeBlock*yCount-mapSizeBlock*y, mapSizeBlock+1,mapSizeBlock+1);
+  //     }
+  //   }
+  // }
+
+  // for(let i in obstacles)
+  // {
+  //   const curProps = obstacles[i]
+  //   fill(color(255,0,0))
+
+  //   rect(margin + (xCount*obSize-curProps.x)/13,margin+(yCount*obSize-curProps.y)/13,obSize/13,obSize/13)
+  // }
+  fill(color(255,255,255))
+  rect(margin+obSize*xCount/26, margin+obSize*yCount/26, obSize*xCount/13,obSize*yCount/13)
 
   for(let i in props)
   {
@@ -514,9 +529,10 @@ function createMiniMap()
 
 function setup()
 {
+  frameRate(30)
     textAlign(CENTER, CENTER);
     bg = loadImage("assets/backgroundImage.gif")
-    frameRate(60)
+    
     createCanvas(windowW, windowH);
     var chatContainer = document.getElementById("chatArea");
     chatContainer.style.left = `${window.innerWidth /2 +windowW/2 - chatContainer.offsetWidth -10 }px`
@@ -620,7 +636,7 @@ function draw()
         }
     }
     createMiniMap()
-    document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})`
+    document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})<br>FPS: ${frameRate()}`
 }
 
 function CreateMap()
