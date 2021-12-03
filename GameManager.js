@@ -8,7 +8,7 @@ module.exports = class GameManager
     this.io = io;
     this.playerManager = playerManager;
     this.playerManager.GameManager = this; 
-    this.speed = 5;
+    this.speed = 10;
     this.bree = require("bree");
     this.currentGameJob;
     this.gameTimer = 0;
