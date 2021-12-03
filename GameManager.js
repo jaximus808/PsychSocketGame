@@ -8,7 +8,7 @@ module.exports = class GameManager
     this.io = io;
     this.playerManager = playerManager;
     this.playerManager.GameManager = this; 
-    this.speed = 10;
+    this.speed = 8;
     this.bree = require("bree");
     this.currentGameJob;
     this.gameTimer = 0;
@@ -80,6 +80,7 @@ module.exports = class GameManager
       
       socket.on("answer", (ans, qID, foodId) =>
       {
+        console.log(this.food[foodId])
         let letValue = ["A","B","C","D"]
         if(ans == this.questions[qID].ans)
         {
@@ -87,15 +88,25 @@ module.exports = class GameManager
           socket.emit("qResponse", true)
           socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `You got that correct! Bring your food home solider!` )
           this.playerGameInformation[socket.id].heldFoodId = foodId
-          if(this.food[this.playerGameInformation[socket.id].heldFoodId]) return; 
+          if(!this.food[this.playerGameInformation[socket.id].heldFoodId]) return; 
+          
+          if(this.food[foodId].state == 1)
+          {
+            socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", `Someone already took that, you snooze you lose` )
+            return;
+          
+          }
           if(!this.food)
           {
             return; //Need to run in and put checks on this.food stuff
           }
+          console.log("nice")
           this.food[this.playerGameInformation[socket.id].heldFoodId].posX =  this.playerGameInformation[socket.id].posX
           this.food[this.playerGameInformation[socket.id].heldFoodId].posY =  this.playerGameInformation[socket.id].posY +25
           this.food[this.playerGameInformation[socket.id].heldFoodId].state = 1
-          io.emit("foodUpdate", foodId,this.food[this.playerGameInformation[socket.id].heldFoodId].posX,this.food[this.playerGameInformation[socket.id].heldFoodId].posY )
+          this.food[this.playerGameInformation[socket.id].heldFoodId].holder = socket.id
+          //io.emit("foodUpdate", foodId,this.food[this.playerGameInformation[socket.id].heldFoodId].posX,this.food[this.playerGameInformation[socket.id].heldFoodId].posY )
+          io.emit("foodAttach", foodId, socket.id)
         }
         else{
           console.log("wrong")
@@ -137,6 +148,24 @@ module.exports = class GameManager
             this.gamestate=1;
             socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", "Starting Game" )
             this.StartGame();
+          }
+          else if(message.trim() == "/stop")
+          {
+            if(this.gameState == 0)
+            {
+              socket.emit("renderMessage", "<span style='color:#db46e8'>Server</span>", "The Game Has Not Started" )
+              return; 
+            }
+          
+            this.food = {};
+            
+            this.io.emit("renderMessage", "<span style='color:#db46e8'>Server (to all)</span>", `Game Has Been Stopped by Host`)
+            
+            
+            this.currentGameJob.stop();
+            this.currentGameJob = undefined;
+            this.gamestate = 0; 
+            this.io.emit("resetGame")
           }
           else
           {
@@ -269,16 +298,7 @@ module.exports = class GameManager
             return;
           }
           
-          if(this.gameTimer%30 == 0 && this.gameTimer != this.timeLength)
-          {
-            //spawn the bonus :DDDD
-            if(!this.bonusSpawn.appear)
-            {
-              this.bonusSpawn.appear = true; 
-              this.io.emit("bonusSpawnUpdate", true)
-            }
-          }
-
+          
           this.iterate++;
           //this could be really unbalanced
           // if(this.iterate == 30 )
@@ -287,14 +307,16 @@ module.exports = class GameManager
           // }
           if(this.iterate == 5)
           {
-            if(Object.keys(this.food).length <6)
+            if(Object.keys(this.food).length <12)
             {
               const newFood ={
                 posX: this.xCount*this.obSize/2 + 60*(Math.random()*2 -1),
                 posY: ((this.map.length/this.xCount) * this.obSize)/2+ 60*(Math.random()*2 -1),
                 radius: 30,
                 state: 0,
-                symbol: Math.floor(Math.random()*7)
+                symbol: Math.floor(Math.random()*7),
+                holder: "",
+                state: 0
                 //0 means ready to be grabbed and will prompt,
                 //1 means being carried
               }
@@ -434,7 +456,7 @@ module.exports = class GameManager
       this.food[playerInfo.heldFoodId].posY =  playerInfo.posY +25
       
       
-      if(this.food[playerInfo.heldFoodId]) this.io.emit("foodUpdate", playerInfo.heldFoodId,this.food[playerInfo.heldFoodId].posX,this.food[playerInfo.heldFoodId].posY )
+      //if(this.food[playerInfo.heldFoodId]) this.io.emit("foodUpdate", playerInfo.heldFoodId,this.food[playerInfo.heldFoodId].posX,this.food[playerInfo.heldFoodId].posY )
     }
    
 

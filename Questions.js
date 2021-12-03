@@ -88,12 +88,12 @@ module.exports =
         prompt: "What are some things obesity significantly increases?<br>A: risk of cramps<br>B: risk of diabetes and heart disease<br>C: risk of diabetes and tumours<br>D: risk of low appetite",
         ans:1
       },
-      16:
+      17:
       {
         prompt: "What is weight correlations twins have?<br>A: +.0 +.0<br>B: +.41 +.59<br>C: +.74 and +.34<br>D: 1.0 1.0",
         ans:2
       },
-      17:
+      18:
       {
         prompt: "What will most likely happen when you are socially influenced by an obese person?<br>A: You are more liekly to become overweight<br>B: You are less likely to become overweight<br>C: It has no influence<br>D: you will convience them become less overweight",
         ans:0

@@ -86,7 +86,7 @@ socket.on("GameInformation", (data) =>
     props.push(new Feeder(data.feederInfo.posX,data.feederInfo.posY,data.feederInfo.radius))
     for(let i in data.food)
     {
-        food[i]= new Food( data.food[i].posX, data.food[i].posY,foodSymbols[data.food[i].symbol],i, data.food[i].radius);
+        food[i]= new Food( data.food[i].posX, data.food[i].posY,foodSymbols[data.food[i].symbol],i, data.food[i].radius,data.food[i].state,data.food[i].holder);
     }
     document.getElementById("Timer").innerHTML = "Time Left: " + data.timer ;
     //fix
@@ -104,6 +104,13 @@ socket.on("GameInformation", (data) =>
     console.log(clients)
     CreateMap()
     gameState = 1;
+})
+
+socket.on("foodAttach" ,(foodId, playerId) =>
+{
+    if(!food[foodId]) return
+    food[foodId].state = 1
+    food[foodId].host = playerId
 })
 
 socket.on("teamPointUpdates",(id, points)=>
@@ -138,6 +145,7 @@ socket.on("startGame",(_timer) =>
     timerOb = setInterval(() =>
     {
         timerCurrent -= 1;
+        if(timerCurrent == 0) return; 
         document.getElementById("Timer").innerHTML = `Time Left: ${timerCurrent} seconds `; 
     }, 1000)
     
@@ -341,19 +349,27 @@ class Bonus
 
 class Food
 {
-    constructor(x,y, symbol, id,rad)
+    constructor(x,y, symbol, id,rad,state,host)
     {
         this.x = x; 
         this.y = y; 
         this.symbol = symbol;
         this.id = id; 
         this.rad = rad
-        this.color = [5,5,5]
+        this.color = [5,5,5],
+        this.host = host;
+        this.state = state
     }
 
     RenderOb(pX,pY)
     {
         fill(94,94,94,150)
+        if(this.state == 1)
+        {
+            this.x = clients[this.host].x;
+            this.y = clients[this.host].y+50; 
+        }
+
         circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
         textSize(24)
         text(this.symbol,windowW/2+(pX -this.x) ,windowH/2+(pY -this.y))
@@ -422,7 +438,7 @@ class Players
         rect(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
         textSize(16)
         fill(0,0,0)
-        text(this.username,windowW/2+(pX -this.x) ,windowH/2+(pY -this.y-this.width-20) )
+        text(this.username,windowW/2+(pX -this.x) ,windowH/2+(pY -this.y-this.width) )
     }
 }
 
@@ -539,7 +555,7 @@ function createMiniMap()
 
 function setup()
 {
-  frameRate(30)
+  frameRate(60)
     textAlign(CENTER, CENTER);
     bg = loadImage("assets/backgroundImage.gif")
     
