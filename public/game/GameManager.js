@@ -41,6 +41,8 @@ var prompted = false;
 var obSize = 64;
 var xCount;
 var yCount = 34
+var xLength; 
+var yLength = obSize* 34
 
 socket.on("test",(message) =>
 {
@@ -60,6 +62,8 @@ socket.on("GameInformation", (data) =>
     MAP = data.map
     //send this from server later
     xCount = MAP.length/34; 
+
+    var xLength = xCount * obSize;  
     // mainPlayer = new MainPlayer(data.localPlayerData.posX, data.localPlayerData.posY,5);
     client = {}  
     console.log(Object.keys(data.playerData))
@@ -328,8 +332,10 @@ class Bonus
   {
     if(!this.appear) return
     fill(255,215,0)
+    let x = windowW/2+(pX -this.x);
+    let y =windowH/2+(pY -this.y)
     noStroke()
-    circle(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.rad)
+    circle(x,y,this.rad)
   }
 }
 
@@ -435,7 +441,7 @@ class Obstacle
     {
         fill(color(255,0,0))
         //console.log(pX)
-        rect(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
+        
     }
 }
 
@@ -471,7 +477,10 @@ class Background
     {
         fill(color(this.color[0],this.color[1],this.color[2]))
         //console.log(pX)
-        rect(windowW/2+(pX -this.x) ,windowH/2+(pY -this.y),this.width,this.width )
+        let x = windowW/2+(pX -this.x) 
+        let y = windowH/2+(pY -this.y)
+        if((x-this.width > xLength && x+this.width < 0 )||(y-this.width > yLength && y+this.width < 0 )) return 
+        rect(x,y,this.width,this.width )
     }
 }
 
@@ -499,15 +508,16 @@ function createMiniMap()
   //   }
   // }
 
-  // for(let i in obstacles)
-  // {
-  //   const curProps = obstacles[i]
-  //   fill(color(255,0,0))
-
-  //   rect(margin + (xCount*obSize-curProps.x)/13,margin+(yCount*obSize-curProps.y)/13,obSize/13,obSize/13)
-  // }
   fill(color(255,255,255))
-  rect(margin+obSize*xCount/26, margin+obSize*yCount/26, obSize*xCount/13,obSize*yCount/13)
+  rect(margin+obSize*xCount/26+1, margin+obSize*yCount/26+1, obSize*xCount/13,obSize*yCount/13)
+
+  for(let i in obstacles)
+  {
+    const curProps = obstacles[i]
+    fill(color(255,0,0))
+
+    rect(margin + (xCount*obSize-curProps.x)/13,margin+(yCount*obSize-curProps.y)/13,obSize/13,obSize/13)
+  }
 
   for(let i in props)
   {
@@ -636,7 +646,7 @@ function draw()
         }
     }
     createMiniMap()
-    document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})<br>FPS: ${frameRate()}`
+    document.getElementById("locationCoord").innerHTML = `Position: \n(${Math.floor(mainPlayer.x)}, ${Math.floor(mainPlayer.y)})<br>FPS: ${frameRate().toFixed(2)}`
 }
 
 function CreateMap()
